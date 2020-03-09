@@ -1,0 +1,107 @@
+.App {
+    text-align: center;
+}
+
+#app-nav-title {
+    font-family: cursive;
+    font-style: italic
+}
+
+#boggle-container {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    /* background-color: #f57921; */
+    background-color: aliceblue;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.logo {
+    align-self: center;
+}
+
+#board {
+    border: 5px solid #ffca08;
+    background-color: #398bd4;
+    width:fit-content;
+    padding: 20px;
+    min-width: 400px;
+}
+
+.row {
+    display: flex;
+    text-align: center;
+    flex-direction: row;
+    padding: 5px;
+}
+
+.boggle:hover {
+    cursor: pointer;
+}
+
+.boggle {
+    min-width: 80px;
+    max-width: 80px;
+    height: 60px;
+    border-radius: 5px;
+    background-color: #ffffff;
+    box-shadow: -4px 11px 8px 1px rgba(0, 0, 0, 0.69);
+    flex: 1 1 auto;
+    margin: 5px;
+}
+
+.error-input {
+    border: 2px red solid !important;
+}
+
+.success-input {
+    border: 2px green solid !important;
+}
+
+.error {
+    color: red;
+    text-align: left !important;
+}
+
+.success {
+    font-weight: bold;
+    color: green;
+    text-align: left !important;
+}
+
+.boggle.selected {
+    background-color: #acceec;
+}
+
+.boggle span {
+    font-weight: bold;
+    display: block;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#word-submit {
+    margin: 15px 0;
+    display: flex;
+    min-width: 400px;
+    height: 70px;
+    justify-content: space-between;
+}
+
+#score-table {
+    border: 3px solid #ffca08;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+#score-table td,
+#score-table th {
+    border: 3px solid #ffca08;
+    background-color: white;
+    padding: 5px;
+}
+
+#score-table tr#footer td {
+    background-color: #acceec;
+}
