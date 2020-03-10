@@ -1,6 +1,6 @@
 # Boggle Client
 ## Setup
-- git clone 
+- git clone https://github.com/kailashthakuri/boggle.git
 - cd boggle/boggle-client
 - npm install
 - npm start
@@ -11,7 +11,7 @@
 
 # Boggle Server
 ## Setup
-- git clone 
+- git clone https://github.com/kailashthakuri/boggle.git 
 - cd boggle/boggle-api
 - bundle install
 - rails server
