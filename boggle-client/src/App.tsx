@@ -7,10 +7,6 @@ import History from "./utils/History";
 import {Provider} from "react-redux";
 import createAppStore from "./store/AppStore";
 
-
-// https://www.codementor.io/@oyebanjijacob/creating-a-boggle-game-using-react-part-1-bd37sulcs
-//https://github.com/piotrwitek/react-redux-typescript-guide/blob/master/README.md
-
 function App() {
     const store = createAppStore();
     return (

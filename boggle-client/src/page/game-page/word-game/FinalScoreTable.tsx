@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {WordPointModel} from "./WordGameContants";
 import * as _ from 'lodash';
 
 
-interface IFinalScoreState {
+export interface IFinalScoreState {
     totalPoint: number,
     totalWords: number,
     longestWord: string,
@@ -11,11 +11,11 @@ interface IFinalScoreState {
 }
 
 function FinalScoreTable(props: { wordPointModels: WordPointModel[]; }) {
-    const [finalScore, setFinalScore] = useState<Partial<IFinalScoreState>>({});
-    useEffect(() => {
+    const [finalScore, setFinalScore] = React.useState<Partial<IFinalScoreState>>({});
+    React.useEffect(() => {
         const sum = props.wordPointModels.reduce((sum, wordPoint) => sum + wordPoint.point, 0);
-        const length = Math.max(...(props.wordPointModels.map(el => el.word.length)));
-        const longestWords = props.wordPointModels.filter(a => a.word.length === length).map(a => a.word.toLocaleLowerCase());
+        const maxLength = Math.max(...(props.wordPointModels.map(el => el.word.length)));
+        const longestWords = props.wordPointModels.filter(a => a.word.length === maxLength).map(a => a.word.toLocaleLowerCase());
         setFinalScore({
             totalPoint: sum,
             totalWords: props.wordPointModels.length,
@@ -23,26 +23,22 @@ function FinalScoreTable(props: { wordPointModels: WordPointModel[]; }) {
         });
     }, [props.wordPointModels])
 
+
+    const renderTableData = (title: string, value: any, className: string) => {
+        return (<tr className={className}>
+            <td>{title} :</td>
+            <td>{value}</td>
+        </tr>);
+    }
+
     return (
         <div>
             <table className="table table-borderless table-striped table-sm">
                 <tbody>
-                <tr>
-                    <td>Total Score :</td>
-                    <td> {finalScore?.totalPoint} </td>
-                </tr>
-                <tr>
-                    <td>Total Words :</td>
-                    <td>{finalScore?.totalWords} </td>
-                </tr>
-                <tr>
-                    <td>Longest Word(s) :</td>
-                    <td> {finalScore?.longestWord} </td>
-                </tr>
-                <tr>
-                    <td>Best Word :</td>
-                    <td>{finalScore?.bestWord}</td>
-                </tr>
+                {renderTableData("Total Score", finalScore?.totalPoint, "total-score")}
+                {renderTableData("Total Words", finalScore?.totalWords, "total-words")}
+                {renderTableData("Longest Word(s)", finalScore?.longestWord, "longest-word")}
+                {renderTableData("Best Word", finalScore?.bestWord, "best-word")}
                 </tbody>
             </table>
         </div>

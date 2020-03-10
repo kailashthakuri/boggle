@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {WordPointModel} from "./WordGameContants";
 
 interface IScoreTableProps {
@@ -6,8 +6,8 @@ interface IScoreTableProps {
 }
 
 function ScoreTable(props: IScoreTableProps) {
-    const [totalPoint, setTotalPoint] = useState(0);
-    useEffect(() => {
+    const [totalPoint, setTotalPoint] = React.useState(0);
+    React.useEffect(() => {
         const totalPoint = props && props.wordPointModels.reduce((sum, wordPoint) => sum + wordPoint.point, 0)
         setTotalPoint(totalPoint);
     }, [props.wordPointModels])

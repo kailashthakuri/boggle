@@ -39,12 +39,11 @@ export class WordGameUtils {
         const charArray = characters.split("");
         let isValid = false;
         for (let i = 0, length = charArray.length; i < length; i++) {
-            const currentWorkModels = _.filter(_.flatten(wordModels),
-                (word: WordModel) => word.char === _.toUpper(charArray[i]));
+            const currentWorkModels = _.filter(_.flatten(wordModels), word => word.char === _.toUpper(charArray[i]));
             if (_.isEmpty(currentWorkModels)) {
                 break;
             }
-            if (i == 0) {
+            if (i === 0) {
                 validWordModelsSequence = _.chunk(currentWorkModels, 1);
                 continue;
             }
@@ -60,7 +59,10 @@ export class WordGameUtils {
         const charSequenceWordModels: Array<Array<WordModel>> = [];
         oldValidWordModelsSequence.forEach(charSequencWordModel => {
             (wordModels || []).forEach(wordModel => {
-                if (WordGameUtils.hasNeighbourRelation(_.last(charSequencWordModel), wordModel)) {
+                const secondLastModel = charSequencWordModel[charSequencWordModel.length - 2];
+                const lastModel = charSequencWordModel[charSequencWordModel.length - 1];
+                if (!(secondLastModel && this.isSameWordModel(wordModel, secondLastModel)) &&
+                    WordGameUtils.hasNeighbourRelation(lastModel, wordModel)) {
                     charSequenceWordModels.push(_.union(charSequencWordModel, [wordModel]));
                 }
             });
@@ -68,10 +70,11 @@ export class WordGameUtils {
         return charSequenceWordModels;
     }
 
-    public static hasNeighbourRelation(word1: WordModel | undefined, word2: WordModel) {
-        if (!word1) {
-            return false;
-        }
+    public static isSameWordModel(word1: WordModel, word2: WordModel) {
+        return word1.column === word2.column && word1.row === word2.row;
+    }
+
+    public static hasNeighbourRelation(word1: WordModel, word2: WordModel) {
         const colDiff = Math.abs(word1.column - word2.column);
         const rowDiff = Math.abs(word1.row - word2.row);
         if ((rowDiff === 1 && colDiff === 1) || (colDiff === 0 && rowDiff === 1) || (colDiff === 1 && rowDiff === 0)) {

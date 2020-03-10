@@ -1,16 +1,16 @@
-import {ValidPointModel, WordPointModel} from "../WordGameContants";
+import {WordPointModel} from "../WordGameContants";
 import {WordGameAction} from "./WordGameAction";
 import {Action} from "../../../../store/AppAction";
 import {Status} from "../../../../utils/AppData";
 
 export interface WordGameState {
-    validWordPoints: Array<WordPointModel>;
-    validPointModel?: ValidPointModel,
+    validWordPointModels: Array<WordPointModel>;
+    wordPointModel?: WordPointModel,
     status?: Status;
 }
 
 const initialState: WordGameState = {
-    validWordPoints: [],
+    validWordPointModels: [],
 };
 
 export const wordGameReducer = (state = initialState, action: Action<WordGameAction, any>) => {
@@ -18,12 +18,12 @@ export const wordGameReducer = (state = initialState, action: Action<WordGameAct
         case WordGameAction.SET_VALID_WORD_POINT:
             return {
                 ...state,
-                validWordPoints: [...state.validWordPoints, action.payload]
+                validWordPointModels: [...state.validWordPointModels, action.payload]
             };
-        case WordGameAction.SET_VALID_POINT:
+        case WordGameAction.SET_WORD_POINT:
             return {
                 ...state,
-                validPointModel: action.payload
+                wordPointModel: action.payload
             };
         case WordGameAction.SET_STATUS:
             return {

@@ -10,14 +10,10 @@ export interface WordModel {
     char: string;
 }
 
-export interface ValidPointModel {
-    valid: boolean;
-    point: number;
-}
-
 export interface WordPointModel {
     word: string;
     point: number;
+    valid?: boolean;
 }
 
 export interface IWordGameDesc {

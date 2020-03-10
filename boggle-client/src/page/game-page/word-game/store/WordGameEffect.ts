@@ -3,8 +3,7 @@ import {Dispatch} from "redux";
 import {WordGameActionFactory, WordGameActionTypes} from "./WordGameAction";
 import {APIData, DataStatus} from "../../../../utils/AppData";
 import {API} from "../../../../utils/Api";
-import {ValidPointModel} from "../WordGameContants";
-
+import {WordPointModel} from "../WordGameContants";
 
 export function tryValidateWordEffect(word: string) {
     return (dispatch: Dispatch<WordGameActionTypes>) => {
@@ -14,18 +13,21 @@ export function tryValidateWordEffect(word: string) {
             headers: {'Content-Type': 'application/json'}
         };
         API.get("/wordvalidate", config)
-            .then((response: AxiosResponse<APIData<ValidPointModel>>) => {
+            .then((response: AxiosResponse<APIData<WordPointModel>>) => {
                 const apiData = response.data;
-                const validPointModel: ValidPointModel = apiData.data;
                 if (apiData.error) {
                     dispatch(WordGameActionFactory.setStatus({status: DataStatus.ErrorState, error: apiData.error}));
                 } else {
+                    apiData.data.word = word;
                     dispatch(WordGameActionFactory.setStatus({status: DataStatus.Loaded}));
-                    dispatch(WordGameActionFactory.setValidPoint(apiData.data));
+                    dispatch(WordGameActionFactory.setWordPoint(apiData.data));
                 }
             })
             .catch(error => {
-                dispatch(WordGameActionFactory.setStatus({status: DataStatus.ErrorState}));
+                dispatch(WordGameActionFactory.setStatus({
+                    status: DataStatus.ErrorState,
+                    error: {errorCode: "404", errorMsg: "Url Not Found"}
+                }));
             });
     };
 }

@@ -4,7 +4,7 @@ import {NavLink} from "react-router-dom";
 function NavBar() {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-            <a className="navbar-brand" href="#">
+            <a className="navbar-brand" href="/">
                 <span id="app-nav-title">BOGGLE</span>
             </a>
             <div className="collapse navbar-collapse" id="navbarText">

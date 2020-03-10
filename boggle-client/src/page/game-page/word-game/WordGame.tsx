@@ -1,6 +1,6 @@
 import React, {RefObject} from "react";
 import {match} from "react-router-dom";
-import {IWordGameDesc, ValidPointModel, WORD_GAME_DESC, WordModel, WordPointModel} from "./WordGameContants";
+import {IWordGameDesc, WORD_GAME_DESC, WordModel, WordPointModel} from "./WordGameContants";
 import {WordGameUtils} from "./WordGameUtils";
 import Board from "./Board";
 import History from "../../../utils/History";
@@ -14,14 +14,16 @@ import {Status} from "../../../utils/AppData";
 import Card from "../../../components/Card";
 import FinalScoreTable from "./FinalScoreTable";
 import StatusWrapper from "../../../components/StatusWrapper";
+import * as _ from 'lodash';
 
 interface IWordGameProps {
     match: match<{ metricId: string }>;
-    wordPointModels: Array<WordPointModel>;
-    validPointModel: ValidPointModel;
+    validWordPointModels: Array<WordPointModel>;
+    wordPointModel: WordPointModel;
     status: Status;
-    setWordPointModels: typeof WordGameActionFactory.setValidWords;
-    tryValidateWord: typeof WordGameActionFactory.tryValidateWord;
+    setValidWordPoint: typeof WordGameActionFactory.setValidWordPoint;
+    setWordPoint: typeof WordGameActionFactory.setWordPoint;
+    tryValidateWord: typeof tryValidateWordEffect
     resetState: typeof WordGameActionFactory.resetState;
 }
 
@@ -35,7 +37,7 @@ interface IWordGameState {
     successMsg?: string;
 }
 
-class WordGame extends React.Component<IWordGameProps, IWordGameState> {
+export class WordGame extends React.Component<IWordGameProps, IWordGameState> {
     inputRef: RefObject<HTMLInputElement>;
     interval: any;
 
@@ -61,8 +63,7 @@ class WordGame extends React.Component<IWordGameProps, IWordGameState> {
 
     setTimer() {
         const endDate = new Date();
-        // endDate.setMinutes(endDate.getMinutes() + 2);
-        endDate.setSeconds(endDate.getSeconds() + 160);
+        endDate.setMinutes(endDate.getMinutes() + 2);
         this.interval = setInterval(() => {
             const remainingSeconds = (+endDate - +new Date()) / 1000;
             if (remainingSeconds >= 0) {
@@ -101,35 +102,47 @@ class WordGame extends React.Component<IWordGameProps, IWordGameState> {
     }
 
     formatTime(minute: number, seconds: number) {
-        return `${minute > 9 ? minute : "0" + minute} : ${
-            seconds > 9 ? seconds : "0" + seconds
-        }`;
+        return `${minute > 9 ? minute : "0" + minute} : ${seconds > 9 ? seconds : "0" + seconds}`;
     }
 
-    componentWillReceiveProps(nextProps: IWordGameProps) {
-        if (nextProps.validPointModel && (this.props.validPointModel !== nextProps.validPointModel)) {
-            const current = nextProps.validPointModel;
-            if (current.point > 0) {
-                this.props.setWordPointModels({word: this.state.word, point: current.point});
-                this.setState({word: "", successMsg: WordGameUtils.getSuccessMsg(current.point)});
+    componentDidUpdate() {
+        const wordPointModel = this.props.wordPointModel;
+        if (wordPointModel) {
+            if (wordPointModel.valid) {
+                this.props.setValidWordPoint(wordPointModel);
+                this.setState({word: "", successMsg: WordGameUtils.getSuccessMsg(wordPointModel.point)});
             } else {
-                this.setState({errorMsg: "Invalid Word."});
+                this.setState({word: "", errorMsg: 'Invalid Word.'});
             }
-            this.clearMessage();
+            this.props.setWordPoint(null);
         }
     }
 
+    // static getDerivedStateFromProps(props: IWordGameProps, state: IWordGameState) {
+    //     const wordPointModel = props.wordPointModel;
+    //     if (wordPointModel) {
+    //         if (wordPointModel.valid) {
+    //             props.setValidWordPoint(wordPointModel);
+    //             state.successMsg=WordGameUtils.getSuccessMsg(wordPointModel.point);
+    //         } else {
+    //             state.errorMsg='Invalid Word.';
+    //         }
+    //         state.word = "";
+    //         props.setWordPoint(null);
+    //     }
+    //     return state;
+    // }
+
     handleSubmit(event: any) {
-        // if (this.state.word.length < 3) {
-        //     this.setState({errorMsg: "Word length must be greater than 2."});
-        // } else if (this.props.wordPointModels.findIndex(wordPoint => wordPoint.word == this.state.word.toUpperCase()) > -1) {
-        //     this.setState({errorMsg: "Word already exist."});
-        // } else if (!WordGameUtils.verifyWordSequence(this.state.wordModels, this.state.word)) {
-        //     this.setState({errorMsg: "Invalid Word."});
-        // } else {
-        //     this.props.tryValidateWord(this.state.word);
-        // }
-        this.props.tryValidateWord(this.state.word);
+        if (this.state.word.length < 3) {
+            this.setState({errorMsg: "Word length must be greater than 2."});
+        } else if (this.props.validWordPointModels.findIndex(wordPoint => _.toUpper(wordPoint.word) === _.toUpper(this.state.word)) > -1) {
+            this.setState({errorMsg: "Word already exist."});
+        } else if (!WordGameUtils.verifyWordSequence(this.state.wordModels, this.state.word)) {
+            this.setState({errorMsg: "Invalid Word."});
+        } else {
+            this.props.tryValidateWord(this.state.word);
+        }
         this.clearMessage();
         event.preventDefault();
     }
@@ -150,45 +163,43 @@ class WordGame extends React.Component<IWordGameProps, IWordGameState> {
                 <div id="boggle-container">
                     <div className="row justify-content-center p-4">
                         {!this.state.timeout ? (
-                            <React.Fragment>
-                                <div
-                                    className={this.state.gameMetric ? this.state.gameMetric.classValue : 'col-lg-6 col-md-7'}>
-                                    <Board wordModels={this.state.wordModels}></Board>
-                                    <div id="word-submit">
-                                        <form className="form-group row" onSubmit={this.handleSubmit}>
-                                            <div className="mx-sm-3 mb-2">
-                                                <input
-                                                    ref={this.inputRef}
-                                                    type="text"
-                                                    value={this.state.word}
-                                                    onChange={this.handleWordChange}
-                                                    className={"form-control " + (this.state.errorMsg && "error-input") + (this.state.successMsg && "success-input")}
-                                                    placeholder="Type Word"/>
-                                                {this.state.errorMsg && (
-                                                    <div className="error">{this.state.errorMsg}</div>)}
-                                                {this.state.successMsg && (
-                                                    <div className="success">{this.state.successMsg}</div>)}
-                                            </div>
-                                            <StatusWrapper status={this.props.status}>
-                                                <button type="submit" className="btn btn-primary mb-5">
-                                                    Submit
-                                                </button>
-                                            </StatusWrapper>
-                                        </form>
-                                    </div>
+                            <div
+                                className={this.state.gameMetric ? this.state.gameMetric.classValue : 'col-lg-6 col-md-7'}>
+                                <Board wordModels={this.state.wordModels}></Board>
+                                <div id="word-submit">
+                                    <form className="form-group row" onSubmit={this.handleSubmit}>
+                                        <div className="mx-sm-3 mb-2">
+                                            <input
+                                                ref={this.inputRef}
+                                                type="text"
+                                                value={this.state.word}
+                                                onChange={this.handleWordChange}
+                                                className={"form-control " + (this.state.errorMsg && "error-input") + (this.state.successMsg && "success-input")}
+                                                placeholder="Type Word"/>
+                                            {this.state.errorMsg && (
+                                                <div className="error">{this.state.errorMsg}</div>)}
+                                            {this.state.successMsg && (
+                                                <div className="success">{this.state.successMsg}</div>)}
+                                        </div>
+                                        <StatusWrapper status={this.props.status}>
+                                            <button type="submit" className="btn btn-primary mb-5">
+                                                Submit
+                                            </button>
+                                        </StatusWrapper>
+                                    </form>
                                 </div>
-                            </React.Fragment>
+                            </div>
                         ) : (
                             <div className="col-lg-6 col-md-7">
                                 <Card title="Final Result" btnLabel="Play Again" handler={this.playAgainHandler}>
-                                    <FinalScoreTable wordPointModels={this.props.wordPointModels}/>
+                                    <FinalScoreTable wordPointModels={this.props.validWordPointModels}/>
                                 </Card>
                             </div>
                         )}
                         <div className="col-lg-4 col-md-4">
                             <div className="col-lg-12 col-md-12">
                                 <div><strong>Timer : {this.state.timer}</strong></div>
-                                <ScoreTable wordPointModels={this.props.wordPointModels}></ScoreTable>
+                                <ScoreTable wordPointModels={this.props.validWordPointModels}></ScoreTable>
                             </div>
                             <div className="col-lg-12 col-md-12"><Card title="Rules"></Card></div>
                         </div>
@@ -201,18 +212,17 @@ class WordGame extends React.Component<IWordGameProps, IWordGameState> {
 
 export const mapStateToProps = (state: AppState) => {
     return {
-        wordPointModels: selectWordGameState(state).validWordPoints,
-        validPointModel: selectWordGameState(state).validPointModel,
+        validWordPointModels: selectWordGameState(state).validWordPointModels,
+        wordPointModel: selectWordGameState(state).wordPointModel,
         status: selectWordGameState(state).status
     };
 };
 
 export const mapDispatchToProps = (dispatch: any) => {
     return {
-        setWordPointModels: (payload: any) =>
-            dispatch(WordGameActionFactory.setValidWords(payload)),
-        tryValidateWord: (payload: string) =>
-            dispatch(tryValidateWordEffect(payload)),
+        setWordPoint: (payload: WordPointModel) => dispatch(WordGameActionFactory.setWordPoint(payload)),
+        setValidWordPoint: (payload: WordPointModel) => dispatch(WordGameActionFactory.setValidWordPoint(payload)),
+        tryValidateWord: (payload: string) => dispatch(tryValidateWordEffect(payload)),
         resetState: () => dispatch(WordGameActionFactory.resetState())
     };
 };

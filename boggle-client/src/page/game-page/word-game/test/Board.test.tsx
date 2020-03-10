@@ -2,6 +2,7 @@ import React from "react";
 import {WordModel} from "../WordGameContants";
 import {shallow} from "enzyme";
 import Board from "../Board";
+import {EnzymeAdapter} from "enzyme";
 
 
 const wordModels: WordModel[][] = [
@@ -30,11 +31,10 @@ const wordModels: WordModel[][] = [
         {row: 3, column: 3, char: "P"}
     ]
 ];
-
-
 describe("Board Component Test", () => {
-    it("should generate 4 by 4 Board", () => {
+    it("can generate 4 by 4 Board", () => {
         const boardWrapper = shallow(<Board wordModels={wordModels}/>);
-
+        const boxes = boardWrapper.find(".boggle");
+        expect(boxes.length).toEqual(16);
     })
 })
