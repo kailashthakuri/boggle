@@ -23,7 +23,7 @@
 #board {
     border: 5px solid #ffca08;
     background-color: #398bd4;
-    width:fit-content;
+    width: fit-content;
     padding: 20px;
     min-width: 400px;
 }
@@ -104,4 +104,8 @@
 
 #score-table tr#footer td {
     background-color: #acceec;
+}
+
+.stat-chart {
+    min-height: 300px;
 }

@@ -15,6 +15,7 @@ import Card from "../../../components/Card";
 import FinalScoreTable from "./FinalScoreTable";
 import StatusWrapper from "../../../components/StatusWrapper";
 import * as _ from 'lodash';
+import BarChart, {BarChartModel} from "../../../components/charts/BarChart";
 
 interface IWordGameProps {
     match: match<{ metricId: string }>;
@@ -32,6 +33,7 @@ interface IWordGameState {
     word: string;
     timeout: boolean;
     timer: string;
+    barChartData?: Array<BarChartModel>;
     gameMetric?: IWordGameDesc;
     errorMsg?: string;
     successMsg?: string;
@@ -75,6 +77,7 @@ export class WordGame extends React.Component<IWordGameProps, IWordGameState> {
                 });
             } else {
                 this.setState({timer: "00 :  00", timeout: true});
+                this.setState({barChartData: (this.getBarChartModels() || [])})
                 clearInterval(this.interval);
             }
         }, 1000);
@@ -116,6 +119,31 @@ export class WordGame extends React.Component<IWordGameProps, IWordGameState> {
             }
             this.props.setWordPoint(null);
         }
+    }
+
+
+    getBarChartModels() {
+        const test: WordPointModel[] = [
+            {word: 'Nepal', point: 1, valid: true},
+            {word: 'Nepal', point: 1, valid: true},
+            {word: 'Nepal', point: 1, valid: true},
+            {word: 'Indiae', point: 1, valid: true},
+            {word: 'Indiae', point: 1, valid: true},
+            {word: 'aa', point: 1, valid: true}
+        ]
+
+        const barChartModels: BarChartModel[] = [];
+        const charLengths = test.map(model => model.word.length);
+        (_.uniq(charLengths).sort() || []).forEach(count => {
+            const occurence = this.getLengthOccurrence(charLengths, count);
+            barChartModels.push({name: `${count} letter`, value: occurence});
+        })
+        console.log(barChartModels);
+        return barChartModels;
+    }
+
+    getLengthOccurrence(array: number[], value: number) {
+        return array.filter((v) => (v === value)).length;
     }
 
     // static getDerivedStateFromProps(props: IWordGameProps, state: IWordGameState) {
@@ -161,48 +189,62 @@ export class WordGame extends React.Component<IWordGameProps, IWordGameState> {
         return (
             <div>
                 <div id="boggle-container">
-                    <div className="row justify-content-center p-4">
+                    <div>
                         {!this.state.timeout ? (
-                            <div
-                                className={this.state.gameMetric ? this.state.gameMetric.classValue : 'col-lg-6 col-md-7'}>
-                                <Board wordModels={this.state.wordModels}></Board>
-                                <div id="word-submit">
-                                    <form className="form-group row" onSubmit={this.handleSubmit}>
-                                        <div className="mx-sm-3 mb-2">
-                                            <input
-                                                ref={this.inputRef}
-                                                type="text"
-                                                value={this.state.word}
-                                                onChange={this.handleWordChange}
-                                                className={"form-control " + (this.state.errorMsg && "error-input") + (this.state.successMsg && "success-input")}
-                                                placeholder="Type Word"/>
-                                            {this.state.errorMsg && (
-                                                <div className="error">{this.state.errorMsg}</div>)}
-                                            {this.state.successMsg && (
-                                                <div className="success">{this.state.successMsg}</div>)}
-                                        </div>
-                                        <StatusWrapper status={this.props.status}>
-                                            <button type="submit" className="btn btn-primary mb-5">
-                                                Submit
-                                            </button>
-                                        </StatusWrapper>
-                                    </form>
+                            <div className="row justify-content-center p-4">
+                                <div
+                                    className={this.state.gameMetric ? this.state.gameMetric.classValue : 'col-lg-6 col-md-7'}>
+                                    <Board wordModels={this.state.wordModels}></Board>
+                                    <div id="word-submit">
+                                        <form className="form-group row" onSubmit={this.handleSubmit}>
+                                            <div className="mx-sm-3 mb-2">
+                                                <input
+                                                    ref={this.inputRef}
+                                                    type="text"
+                                                    value={this.state.word}
+                                                    onChange={this.handleWordChange}
+                                                    className={"form-control " + (this.state.errorMsg && "error-input") + (this.state.successMsg && "success-input")}
+                                                    placeholder="Type Word"/>
+                                                {this.state.errorMsg && (
+                                                    <div className="error">{this.state.errorMsg}</div>)}
+                                                {this.state.successMsg && (
+                                                    <div className="success">{this.state.successMsg}</div>)}
+                                            </div>
+                                            <StatusWrapper status={this.props.status}>
+                                                <button type="submit" className="btn btn-primary mb-5">
+                                                    Submit
+                                                </button>
+                                            </StatusWrapper>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div className="col-lg-4 col-md-4">
+                                    <div className="col-lg-12 col-md-12">
+                                        <div><strong>Timer : {this.state.timer}</strong></div>
+                                        <ScoreTable wordPointModels={this.props.validWordPointModels}></ScoreTable>
+                                    </div>
+                                    <div className="col-lg-12 col-md-12"><Card title="Rules"></Card></div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="col-lg-6 col-md-7">
-                                <Card title="Final Result" btnLabel="Play Again" handler={this.playAgainHandler}>
-                                    <FinalScoreTable wordPointModels={this.props.validWordPointModels}/>
-                                </Card>
+                            <div className="row justify-content-center p-4">
+                                <div className="col-md-4">
+                                    <Card title="Final Result" btnLabel="Play Again"
+                                          handler={this.playAgainHandler}>
+                                        <FinalScoreTable wordPointModels={this.props.validWordPointModels}/>
+                                    </Card>
+                                </div>
+                                <div className="col-md-8 stat-chart">
+                                    <Card title="Score Statistics">
+                                        <BarChart data={this.state.barChartData || []}
+                                                  ticks={this.state.barChartData?.length}
+                                                  xAxisLabel="No. of letters per word"
+                                                  yAxisLabel="No. of counts"
+                                                  svgHeight={200} innerPadding={6}/>
+                                    </Card>
+                                </div>
                             </div>
                         )}
-                        <div className="col-lg-4 col-md-4">
-                            <div className="col-lg-12 col-md-12">
-                                <div><strong>Timer : {this.state.timer}</strong></div>
-                                <ScoreTable wordPointModels={this.props.validWordPointModels}></ScoreTable>
-                            </div>
-                            <div className="col-lg-12 col-md-12"><Card title="Rules"></Card></div>
-                        </div>
                     </div>
                 </div>
             </div>

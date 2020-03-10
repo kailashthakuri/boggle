@@ -9,5 +9,4 @@ const statusReducer = (state: DataStatus, action: Action<StatusAction, DataStatu
         default:
             return state;
     }
-
 };
